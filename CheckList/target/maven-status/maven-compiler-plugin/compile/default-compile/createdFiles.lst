@@ -1,0 +1,8 @@
+com\example\checklist\AuthentictionService.class
+com\example\checklist\KeyService.class
+com\example\checklist\User$State.class
+com\example\checklist\Group.class
+com\example\checklist\resources\JavaEE8Resource.class
+com\example\checklist\DatasourceProducer.class
+com\example\checklist\User.class
+com\example\checklist\JAXRSConfiguration.class
