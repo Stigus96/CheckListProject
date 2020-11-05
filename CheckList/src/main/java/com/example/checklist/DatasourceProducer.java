@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 @DataSourceDefinition(
     name = JNDI_NAME,
     className = "org.h2.jdbcx.JdbcDataSource",
-    url = "jdbc:h2:~/help")
+    url = "jdbc:h2:~/CheckList")
 public class DatasourceProducer {
     public static final String JNDI_NAME =  "java:app/jdbc/default";
 
