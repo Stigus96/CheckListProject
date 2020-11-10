@@ -14,10 +14,12 @@ import android.widget.Button;
 
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 public class MainActivity extends AppCompatActivity {
     boolean isLoggedIn = false;
+    private FloatingActionButton createNewChecklist;
 
 
     @Override
@@ -25,7 +27,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        createNewChecklist = findViewById(R.id.fab);
 
+        createNewChecklist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {openCreateChecklistActivity();}
+            });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -59,6 +66,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void openCreateChecklistActivity(){
+        Intent intent = new Intent(this, CreateCheckListActivity.class);
+        startActivity(intent);
     }
 
 
