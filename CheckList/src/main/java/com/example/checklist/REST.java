@@ -84,10 +84,49 @@ public class REST {
         return Response.ok(item).build();
     }
     
-
+    @POST
+    @Path("createchecklist")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({Group.USER})
+    public Response createChecklistWithTemplate(@FormParam("title") String title,
+            @FormParam("templateid") Long templateid
+            ){
+        User user = em.find(User.class, sc.getUserPrincipal().getName());
+        
+        CheckList checklist = new CheckList();
+        checklist.setTitle(title);
+        checklist.setOwner(user);
+        checklist.setTemplate(false);
+        
+        //TODO add function to copy items from selected template
+        CheckList templatelist = em.find(CheckList.class, templateid);
+        
+        for (Item tempitem : templatelist.getItems()){
             
+            Item item = new Item();
+            item.setChecklist(checklist);
+            item.setTitle(tempitem.getTitle());
+            item.setChecked(false);
+            em.merge(item);
+            checklist.addItem(item);
+        }
+          
+        em.merge(checklist);
+        return Response.ok(checklist).build(); 
+    }
+    
+   /** @GET
+    @Path("MyChecklists")
+    @RolesAllowed({Group.USER})
+    public List<CheckList> getOwnedCheckLists(){
+        User owner = em.find(User.class, sc.getUserPrincipal().getName());
+        return em.createNamedQuery(CheckList.FIND BY USER, CheckList.class)
+                .setParameter("owner", owner)
+                .getResultList();
+    }**/
+            
+        
     /**
-     * TODO: Check if user is part of receivers
      *
      * @param conversationid
      * @return

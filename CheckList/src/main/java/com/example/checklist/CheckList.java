@@ -8,6 +8,7 @@ package com.example.checklist;
 import static com.example.checklist.CheckList.FIND_ALL_CHECKLISTS;
 import static com.example.checklist.CheckList.FIND_ALL_TEMPLATES;
 import static com.example.checklist.CheckList.FIND_BY_ID;
+//import static com.example.checklist.CheckList.FIND_BY_USER;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +44,13 @@ import lombok.NoArgsConstructor;
 @NamedQuery(name = FIND_ALL_TEMPLATES, query = "SELECT c FROM CheckList c WHERE c.template = true")
 @NamedQuery(name = FIND_ALL_CHECKLISTS, query = "SELECT c FROM CheckList c")
 @NamedQuery(name = FIND_BY_ID, query = "SELECT c FROM CheckList c WHERE c.checklistid = :checklistid")
+//@NamedQuery(name = FIND_BY_USER, query = "SELECT c FROM ChekcList c WHERE c.owner = :owner")
 
 public class CheckList implements Serializable {
     public static final String FIND_ALL_TEMPLATES = "CheckList.findAllTemplates";
     public static final String FIND_ALL_CHECKLISTS = "CheckList.findAllChecklists";
     public static final String FIND_BY_ID = "CheckList.findById";
+    //public static final String FIND_BY_USER = "Checklist.findByUser";
     
     @EqualsAndHashCode.Include
     @Id
