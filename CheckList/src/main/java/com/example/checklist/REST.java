@@ -142,15 +142,16 @@ public class REST {
         
     }
     
-   /** @GET
+    @GET
     @Path("MyChecklists")
     @RolesAllowed({Group.USER})
     public List<CheckList> getOwnedCheckLists(){
         User owner = em.find(User.class, sc.getUserPrincipal().getName());
-        return em.createNamedQuery(CheckList.FIND BY USER, CheckList.class)
-                .setParameter("owner", owner)
+        String ownerid = owner.getUserid();
+        return em.createNamedQuery(CheckList.FIND_BY_OWNER, CheckList.class)            
+                .setParameter("owner", ownerid)
                 .getResultList();
-    }**/
+    }
             
         
     /**
