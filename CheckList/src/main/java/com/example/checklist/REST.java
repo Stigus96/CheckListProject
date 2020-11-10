@@ -6,6 +6,7 @@
 package com.example.checklist;
 
 import java.util.List;
+import java.util.logging.Level;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -16,7 +17,9 @@ import javax.security.enterprise.identitystore.PasswordHash;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -113,6 +116,30 @@ public class REST {
           
         em.merge(checklist);
         return Response.ok(checklist).build(); 
+    }
+    
+    @PUT
+    @Path("changechecked/{itemid}")
+    @RolesAllowed({Group.USER})
+    public Response changeChecked(@PathParam("itemid") Long itemid){
+        User user = em.find(User.class, sc.getUserPrincipal().getName());
+        Item item = em.find(Item.class, itemid);
+        CheckList checklist = item.getChecklist();
+        if (checklist.getOwner() == user) {
+            
+            if (item.isChecked()){
+                item.setChecked(false);
+            }
+            
+            else if (!item.isChecked()){
+                item.setChecked(true);
+            }
+            
+            return Response.ok(em.merge(item)).build();
+            
+        } else {log.log(Level.INFO, "you do not have permission to change this checklist");
+            return Response.status(Response.Status.BAD_REQUEST).build();}
+        
     }
     
    /** @GET
