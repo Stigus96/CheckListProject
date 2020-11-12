@@ -13,13 +13,22 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
+    static final int LOGIN_REQUEST = 1;
     boolean isLoggedIn = false;
     private FloatingActionButton createNewChecklist;
+    private RecyclerView recyclerView;
+    ChecklistAdapter adapter = new ChecklistAdapter();
+
 
 
     @Override
@@ -37,7 +46,40 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //open checklist when clicked
+        adapter.setOnClickListener(position -> {
+            Intent intent = new Intent(this, ChecklistActivity.class);
+            Checklist checklist = adapter.getChecklists().get(position);
+            Client.getSingleton().setSelectedChecklist(checklist);
+            startActivity(intent);
+        });
 
+        recyclerView = findViewById(R.id.checklist);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivityForResult(intent, LOGIN_REQUEST);
+
+        Client.getSingleton().setChecklistsLoadedListener(this::onChecklistLoaded);
+
+    }
+
+    protected void onChecklistLoaded(List<Checklist> checklists){
+        recyclerView.post(() -> adapter.setChecklists(checklists));
+    }
+
+    /**
+     * Display errormessage to user
+     *
+     * @param throwable
+     */
+    protected void onException(Throwable throwable) {
+        Snackbar.make(findViewById(android.R.id.content),
+                "Failed to communicate with server", Snackbar.LENGTH_LONG)
+                .setAction("Action", null)
+                .show();
     }
 
     @Override
@@ -66,6 +108,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        // Check which request we're responding to
+        if (requestCode == LOGIN_REQUEST) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                new ChecklistLoader(checklists -> {},this::onException).execute();
+            }
+        }
     }
 
     private void openCreateChecklistActivity(){
