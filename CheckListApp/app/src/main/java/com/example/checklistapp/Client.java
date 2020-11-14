@@ -19,7 +19,7 @@ public class Client {
 
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.S'Z'[z]";
 
-    public static final String IP = "10.22.176.136";
+    public static final String IP = "192.168.1.68";
     public static final String APIURL = "http://" + IP + ":8080/CheckList/resources/";
     public static final String LOGIN_URL = APIURL + "auth/login";
     public static final String CURRENT_USER_URL = APIURL + "auth/currentuser";
@@ -169,6 +169,9 @@ public class Client {
                 case "title":
                     result.setTitle(jr.nextString());
                     break;
+                case "items":
+                    result.setItems(loadItems(jr));
+                    break;
                 default:
                     jr.skipValue();
             }
@@ -212,6 +215,45 @@ public class Client {
             result.add(loadChecklist(jr));
         }
         jr.endArray();
+        return result;
+    }
+
+    private List<Item> loadItems(JsonReader jr) throws IOException {
+        List<Item> result = new ArrayList<>();
+
+        jr.beginArray();
+        while (jr.hasNext()){
+            result.add(loadItem(jr));
+        }
+        jr.endArray();
+
+        return result;
+    }
+
+    public Item loadItem(JsonReader jr) throws IOException{
+        Item result = new Item();
+
+        jr.beginObject();
+        while (jr.hasNext()){
+            switch (jr.nextName()){
+                case "checked":
+                    result.setChecked(jr.nextBoolean());
+                    break;
+                case "itemid":
+                    result.setItemid(jr.nextLong());
+                    break;
+                case "checklist":
+                    result.setChecklist(loadChecklist(jr));
+                    break;
+                case "title":
+                    result.setTitle(jr.nextString());
+                    break;
+                default:
+                    jr.skipValue();
+            }
+        }
+        jr.endObject();
+
         return result;
     }
 }
