@@ -119,9 +119,9 @@ public class REST {
     }
     
     @PUT
-    @Path("changechecked/{itemid}")
+    @Path("changechecked")
     @RolesAllowed({Group.USER})
-    public Response changeChecked(@PathParam("itemid") Long itemid){
+    public Response changeChecked(@FormParam("itemid") Long itemid){
         User user = em.find(User.class, sc.getUserPrincipal().getName());
         Item item = em.find(Item.class, itemid);
         CheckList checklist = item.getChecklist();

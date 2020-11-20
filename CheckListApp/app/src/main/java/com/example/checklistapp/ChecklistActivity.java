@@ -1,5 +1,6 @@
 package com.example.checklistapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -27,12 +28,24 @@ public class ChecklistActivity extends AppCompatActivity {
 
             adapter.setItems(checklist.getItems());
         }
-        //findViewById(R.id.item_checkbox).setOnClickListener(this::changeCheckboxState);
+
+        adapter.setOnClickListener(position -> {
+            Item item = adapter.getItems().get(position);
+
+            new UpdateItemTask().execute(item.getItemid());
+
+
+            //Client.getSingleton().updateItem(item.getItemid());
+
+        });
         
    }
 
-    private void changeCheckboxState(View view) {
-    }
+//    private void changeCheckboxState() {
+//        Item item = adapter.getItem(recyclerView.getChildAdapterPosition(adapter.ItemViewHolder.getAdapterPosition()));
+//
+//        Client.getSingleton().updateItem(item.getItemid());
+//    }
 
 
 }

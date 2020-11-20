@@ -15,7 +15,7 @@ public class ChecklistLoader extends AbstractAsyncTask<Void, Void, List<Checklis
     @Override
     protected List<Checklist> doInBackground(Void... nothingHereMoveAlong) {
         try {
-            return Client.getSingleton().loadChecklists();
+            return Client.getSingleton().loadMyChecklists();
         } catch (IOException e) {
             setException(e);
         }
@@ -23,3 +23,5 @@ public class ChecklistLoader extends AbstractAsyncTask<Void, Void, List<Checklis
         return Collections.emptyList();
     }
 }
+
+

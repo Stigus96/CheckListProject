@@ -66,6 +66,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        new ChecklistLoader(checklists -> {},this::onException).execute();
+    }
+
     protected void onChecklistLoaded(List<Checklist> checklists){
         recyclerView.post(() -> adapter.setChecklists(checklists));
     }

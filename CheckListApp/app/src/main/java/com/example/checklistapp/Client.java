@@ -4,9 +4,11 @@ import android.util.JsonReader;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -19,12 +21,14 @@ public class Client {
 
     public static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.S'Z'[z]";
 
-    public static final String IP = "192.168.1.68";
+    public static final String IP = "192.168.2.188";
     public static final String APIURL = "http://" + IP + ":8080/CheckList/resources/";
     public static final String LOGIN_URL = APIURL + "auth/login";
     public static final String CURRENT_USER_URL = APIURL + "auth/currentuser";
     public static final String CREATE_USER_URL = APIURL + "auth/create";
     public static final String GET_MY_CHECKLISTS_URL = APIURL + "REST/MyChecklists";
+    public static final String UPDATE_ITEM_URL = APIURL + "REST/changechecked/";
+    public static final String GET_TEMPLATES_URL = APIURL + "REST/templates";
 
     /**
      * JWT token returned from login
@@ -44,29 +48,34 @@ public class Client {
     }
 
     protected User user;
-    protected OnChecklistsLoaded onChecklistsLoaded = checklists -> { };
+    protected OnChecklistsLoaded onChecklistsLoaded = checklists -> {
+    };
     protected Checklist selectedChecklist;
     protected List<Checklist> checklists = new ArrayList<>();
 
-    public void setChecklistsLoadedListener(OnChecklistsLoaded listener){
+    public void setChecklistsLoadedListener(OnChecklistsLoaded listener) {
         this.onChecklistsLoaded = listener;
     }
 
-    public Checklist getSelectedChecklist() {return selectedChecklist;}
+    public Checklist getSelectedChecklist() {
+        return selectedChecklist;
+    }
 
-    public void setSelectedChecklist(Long checklistid){
-        if (checklistid != null){
+    public void setSelectedChecklist(Long checklistid) {
+        if (checklistid != null) {
             checklists.stream()
                     .filter(checklist -> checklist.getChecklistid() == checklistid)
                     .findFirst().ifPresent(this::setSelectedChecklist);
         }
     }
 
-    public void setSelectedChecklist(Checklist selectedChecklist){
+    public void setSelectedChecklist(Checklist selectedChecklist) {
         this.selectedChecklist = selectedChecklist;
     }
 
-    public List<Checklist> getChecklists(){return checklists;}
+    public List<Checklist> getChecklists() {
+        return checklists;
+    }
 
     public HttpURLConnection getSecureConnection(String url) throws IOException {
         HttpURLConnection result = (HttpURLConnection) new URL(url).openConnection();
@@ -181,24 +190,37 @@ public class Client {
         return result;
     }
 
-    public List<Checklist> loadChecklists() throws IOException{
+
+    public List<Checklist> loadMyChecklists() throws IOException {
+        List<Checklist> result;
+        result = loadChecklists(GET_MY_CHECKLISTS_URL);
+        return result;
+    }
+
+    public List<Checklist> loadTemplates() throws IOException {
+        List<Checklist> result;
+        result = loadChecklists(GET_TEMPLATES_URL);
+        return result;
+    }
+
+    private List<Checklist> loadChecklists(String url) throws IOException {
         List<Checklist> result = new ArrayList<>();
 
         HttpURLConnection c = null;
-        try{
-            c = getSecureConnection(GET_MY_CHECKLISTS_URL);
+        try {
+            c = getSecureConnection(url);
             c.setUseCaches(true);
             c.setRequestMethod("GET");
 
-            if(c.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (c.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), StandardCharsets.UTF_8));
                 JsonReader jr = new JsonReader(br);
                 result = loadChecklists(jr);
                 jr.close();
                 c.getInputStream().close(); // Why?
             }
-            }finally {
-            if(c != null) c.disconnect();
+        } finally {
+            if (c != null) c.disconnect();
         }
 
         checklists = new ArrayList<>(result);
@@ -211,7 +233,7 @@ public class Client {
         List<Checklist> result = new ArrayList<>();
 
         jr.beginArray();
-        while(jr.hasNext()){
+        while (jr.hasNext()) {
             result.add(loadChecklist(jr));
         }
         jr.endArray();
@@ -222,7 +244,7 @@ public class Client {
         List<Item> result = new ArrayList<>();
 
         jr.beginArray();
-        while (jr.hasNext()){
+        while (jr.hasNext()) {
             result.add(loadItem(jr));
         }
         jr.endArray();
@@ -230,12 +252,12 @@ public class Client {
         return result;
     }
 
-    public Item loadItem(JsonReader jr) throws IOException{
+    public Item loadItem(JsonReader jr) throws IOException {
         Item result = new Item();
 
         jr.beginObject();
-        while (jr.hasNext()){
-            switch (jr.nextName()){
+        while (jr.hasNext()) {
+            switch (jr.nextName()) {
                 case "checked":
                     result.setChecked(jr.nextBoolean());
                     break;
@@ -255,5 +277,31 @@ public class Client {
         jr.endObject();
 
         return result;
+    }
+
+    public void updateItem(long itemid) throws IOException {
+        Item result;
+        String urlParameters = "itemid=" + itemid;
+        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+        int postDataLength = postData.length;
+        HttpURLConnection con;
+        con = getSecureConnection(UPDATE_ITEM_URL);
+        con.setDoOutput(true);
+        con.setRequestMethod("PUT");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        con.setRequestProperty("charset", "utf-8");
+        con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+        con.setUseCaches(false);
+        System.out.println("updated item: " + itemid);
+
+        try (DataOutputStream out = new DataOutputStream(con.getOutputStream())) {
+            out.write(postData);
+        }
+        try (JsonReader jr = new JsonReader(new InputStreamReader(new BufferedInputStream(con.getInputStream())))) {
+            result = loadItem(jr);
+            con.getInputStream().close(); // Why?
+        }finally {
+            con.disconnect();
+        }
     }
 }
