@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import java.util.List;
 
 
 public class SpinnerAdapter extends ArrayAdapter<Checklist> {
@@ -16,10 +17,10 @@ public class SpinnerAdapter extends ArrayAdapter<Checklist> {
     private Context context;
     private Checklist[] values;
 
-    public SpinnerAdapter(@NonNull Context context, int resource, Checklist[] values) {
+    public SpinnerAdapter(@NonNull Context context, int resource, List<Checklist> values) {
         super(context, resource, values);
         this.context = context;
-        this.values = values;
+        this.values = values.toArray(new Checklist[0]);
     }
 
     @Override

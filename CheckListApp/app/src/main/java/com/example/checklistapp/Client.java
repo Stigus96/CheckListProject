@@ -29,7 +29,7 @@ public class Client {
     public static final String GET_MY_CHECKLISTS_URL = APIURL + "REST/MyChecklists";
     public static final String UPDATE_ITEM_URL = APIURL + "REST/changechecked/";
     public static final String GET_TEMPLATES_URL = APIURL + "REST/templates";
-
+    public static final String CREATE_CHECKLIST_URL = APIURL + "REST/createchecklist";
     /**
      * JWT token returned from login
      */
@@ -187,6 +187,38 @@ public class Client {
         }
         jr.endObject();
 
+        return result;
+    }
+
+    public Checklist createChecklist(String title, long checklistid) throws IOException {
+        Checklist result;
+
+        String urlParameters = "title=" + title + "&templateid=" + checklistid;
+
+        byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
+        int postDataLength = postData.length;
+
+        HttpURLConnection con;
+        con = getSecureConnection(CREATE_CHECKLIST_URL);
+
+        con.setDoOutput(true);
+        con.setInstanceFollowRedirects(false);
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("charset", "utf-8");
+        con.setRequestProperty("Content-Length", Integer.toString(postDataLength));
+        con.setUseCaches(false);
+
+        try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
+            wr.write(postData);
+        }
+        // Read JSON result
+        try (JsonReader jr = new JsonReader(new InputStreamReader(new BufferedInputStream(con.getInputStream())))) {
+            result = loadChecklist(jr);
+            con.getInputStream().close(); // Why?
+        } finally {
+            if (con != null) con.disconnect();
+        }
         return result;
     }
 

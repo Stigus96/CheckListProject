@@ -107,7 +107,7 @@ public class CreateUserTask extends AsyncTask<Void, Void, Boolean> {
             setResult(RESULT_OK);
             finish();
         } else {
-            mPasswordView.setError(getString(R.string.error_incorrect_password));
+            mPasswordView.setError("something went wrong");
             mPasswordView.requestFocus();
         }
     }

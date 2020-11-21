@@ -10,7 +10,7 @@ import java.util.List;
 public class LoadTemplatesTask extends AbstractAsyncTask<Void, Void, List<Checklist>> {
 
 
-    public LoadTemplatesTask(OnPostExecute<List<Checklist>> onPostExecute) {
+    public LoadTemplatesTask(OnPostExecute<List<Checklist>> onPostExecute, OnException onException) {
         super(onPostExecute);
     }
 
