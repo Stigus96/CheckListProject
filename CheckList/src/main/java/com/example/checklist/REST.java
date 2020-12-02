@@ -82,9 +82,9 @@ public class REST {
         item.setChecked(false);
         
         
-        em.merge(item);
+        em.persist(item);
         checklist.addItem(item);
-        return Response.ok(item).build();
+        return Response.ok(checklist).build();
     }
     
     @POST
